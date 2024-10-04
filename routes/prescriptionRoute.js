@@ -1,9 +1,13 @@
-// const { Router } = require("express");
-// const { createPrescription } = require("../controllers/prescriptionController");
-// const {  DoctorAuth } = require("../middlewares/auth");
+const { Router } = require("express");
+const { DoctorAuth } = require("../middlewares/auth");
+const {  allAppointment, PatientDetails } = require("../controllers/prescriptionController");
 
-// const PrescriptionRoute = Router();
+const PrescriptionRoute = Router();
 
-// // PrescriptionRoute.post("/create-prescription",DoctorAuth,createPrescription);
+// Today appointment
+PrescriptionRoute.get("/AllAppointment",DoctorAuth,allAppointment);
 
-// module.exports = PrescriptionRoute;
+
+// pateitn details
+PrescriptionRoute.get("/SinglePatientDetails/:id", DoctorAuth,PatientDetails);
+module.exports = PrescriptionRoute;

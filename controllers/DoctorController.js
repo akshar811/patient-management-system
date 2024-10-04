@@ -3,15 +3,16 @@ const jwt = require("jsonwebtoken");
 const Doctor = require("../models/DcoterSchema");
 const appointmentModel = require("../models/AppointmentModel");
 
-
 // doctor log in
 const doctorLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    let data = await Doctor.findOne({ email: email });
+    const { DoctorEmail, password } = req.body;
+    let data = await Doctor.findOne({ DoctorEmail: DoctorEmail });
 
     if (data) {
-      if (password === data.password) {
+      if (password !== data.password) {
+        res.status(400).json({ message: "Password incorrect" });
+      } else {
         let Doctortoken = jwt.sign(
           { id: data._id },
           process.env.doctorSecrate,
@@ -21,8 +22,6 @@ const doctorLogin = async (req, res) => {
         res
           .status(200)
           .json({ message: "Successfully Login", data, Doctortoken });
-      } else {
-        res.status(400).json({ message: "Password incorrect" });
       }
     } else {
       res.status(400).json({ message: "User not found" });
@@ -66,57 +65,67 @@ const resetpassword = async (req, res) => {
   }
 };
 
-
 // doctor profile
 const DoctorProfile = async (req, res) => {
   try {
-      let doctordata = await Doctor.findById({ _id: req.body.DoctorID})
-      res.json(doctordata)
+    let doctordata = await Doctor.findById({ _id: req.body.DoctorID });
+    res.json(doctordata);
   } catch (error) {
-      res.state(500).json({ msg: error.message })
+    res.state(500).json({ msg: error.message });
   }
-}
+};
 
 // edit profile
 
 const EditProfile = async (req, res) => {
   try {
-    let { id } = req.params	
-    let data = await Doctor.findByIdAndUpdate(id, req.body,{new:true})
-    res.json({ message: "update succesfully", data })
-
-} catch (error) {
-    res.status(500).json({ msg: error.message })
-}
-}
+    let { id } = req.params;
+    let data = await Doctor.findByIdAndUpdate(id, req.body, { new: true });
+    res.json({ message: "update succesfully", data });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+};
 
 // patient record
 const PatientRecord = async (req, res) => {
   try {
+    const appointmentHistory = await appointmentModel
+      .find({ DoctorID: req.body.DoctorID })
+      .populate("PatientID", "firstname lastname age gender"); // Populates patient information
 
-    const appointmentHistory = await appointmentModel.find({ DoctorID:req.body.DoctorID })
-      .populate('PatientID', 'firstname lastname age gender') // Populates patient information
-      
-    res.status(200).json({ message: 'Doctor appointment history', data: appointmentHistory });
+    res
+      .status(200)
+      .json({
+        message: "Doctor appointment history",
+        data: appointmentHistory,
+      });
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}
-
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // single page patient details
-const SinglePatient=async(req,res)=>{
+const SinglePatient = async (req, res) => {
   try {
-      let{PatientID}=req.params
-      const singlepatient=await appointmentModel.findOne({PatientID})
-      .populate({ path: "PatientID" }) 
+    let { PatientID } = req.params;
+    const singlepatient = await appointmentModel
+      .findOne({ PatientID })
+      .populate({ path: "PatientID" })
       .populate({ path: "DoctorID", select: "DoctorName" });
-      res.json(singlepatient)
+    res.json(singlepatient);
   } catch (error) {
-      console.log(error);
-      
-      res.status(500).json({ message: error.message });
-  }
-}
+    console.log(error);
 
-module.exports = { doctorLogin , resetpassword , DoctorProfile , EditProfile , PatientRecord , SinglePatient};
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  doctorLogin,
+  resetpassword,
+  DoctorProfile,
+  EditProfile,
+  PatientRecord,
+  SinglePatient,
+};
