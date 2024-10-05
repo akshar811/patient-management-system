@@ -1,8 +1,13 @@
 const appointmentModel = require("../models/AppointmentModel");
+const Patient = require("../models/PatientModel");
+
+// create appoinment
 
 const createAppointment = async (req, res) => {
   try {
-    const { PatientID, DoctorID, appointmentdate, appointmentTime } = req.body;
+    const { DoctorID, appointmentdate, appointmentTime } = req.body;
+
+    const patient = await Patient.findById(req.body.PatientID);
 
     // Check if the doctor is available at the requested time
     const conflictingAppointment = await appointmentModel.findOne({
@@ -22,12 +27,13 @@ const createAppointment = async (req, res) => {
     const newAppointment = new appointmentModel(req.body);
     await newAppointment.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Appointment booked successfully",
-        data: newAppointment,
-      });
+    patient.AppointmentID.push(newAppointment._id);
+    await patient.save();
+
+    res.status(201).json({
+      message: "Appointment booked successfully",
+      data: newAppointment,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -36,9 +42,11 @@ const createAppointment = async (req, res) => {
 // AllAppointment
 const AllAppointment = async (req, res) => {
   try {
-    let data = await appointmentModel.find({
-      PatientID: req.body.PatientID,
-    }).populate("PatientID DoctorID HospitalID");
+    let data = await appointmentModel
+      .find({
+        PatientID: req.body.PatientID,
+      })
+      .populate("PatientID DoctorID HospitalID");
     res.json(data);
   } catch (error) {
     res.status(500).json({ msg: error.message });
@@ -49,7 +57,9 @@ const AllAppointment = async (req, res) => {
 const UpdateAppointment = async (req, res) => {
   try {
     let { id } = req.params;
-    let data = await appointmentModel.findByIdAndUpdate(id, req.body, { new: true });
+    let data = await appointmentModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.json({ message: "update succesfully", data });
   } catch (error) {
     res.status(500).json({ msg: error.message });
@@ -67,78 +77,50 @@ const DeleteAppointment = async (req, res) => {
   }
 };
 
-
-
 // Fetch appointment history for a patient
 const getPatientAppointmentHistory = async (req, res) => {
-    try {
-        const { PatientID } = req.params;
+  try {
+    const { PatientID } = req.params;
 
-        const appointmentHistory = await appointmentModel.find({ PatientID })
-            .populate('DoctorID', 'DoctorName specialtiyType') // Populates doctor information
-            .sort({ appointmentdate: -1 }); // Sort by date (most recent first)
+    const appointmentHistory = await appointmentModel
+      .find({ PatientID })
+      .populate("DoctorID", "DoctorName specialtiyType") // Populates doctor information
+      .sort({ appointmentdate: -1 }); // Sort by date (most recent first)
 
-        res.status(200).json({ message: 'Patient appointment history', data: appointmentHistory });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    res
+      .status(200)
+      .json({
+        message: "Patient appointment history",
+        data: appointmentHistory,
+      });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
-
 
 // Fetch appointment history for a doctor
 const getDoctorAppointmentHistory = async (req, res) => {
-    try {
-      const { DoctorID } = req.params;
-  
-      const appointmentHistory = await appointmentModel.find({ DoctorID })
-        .populate('PatientID', 'firstname lastname') // Populates patient information
-        .sort({ appointmentdate: -1 });
-        console.log(appointmentHistory);
-        
-      res.status(200).json({ message: 'Doctor appointment history', data: appointmentHistory });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+  try {
+    const { DoctorID } = req.params;
+
+    const appointmentHistory = await appointmentModel
+      .find({ DoctorID })
+      .populate("PatientID", "firstname lastname") // Populates patient information
+      .sort({ appointmentdate: -1 });
+    console.log(appointmentHistory);
+
+    res
+      .status(200)
+      .json({
+        message: "Doctor appointment history",
+        data: appointmentHistory,
+      });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
-  // Cancel an appointment
-  const cancelAppointment = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      const appointment = await appointmentModel.findById(id);
-  
-      if (!appointment) {
-        return res.status(404).json({ message: 'Appointment not found' });
-      }
-  
-      appointment.status = 'cancelled';
-      await appointment.save();
-  
-      res.status(200).json({ message: 'Appointment cancelled successfully', data: appointment });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
-
-
-    // Fetch all upcoming appointments for a doctor
-const getDoctorUpcomingAppointments = async (req, res) => {
-    try {
-      const { DoctorID } = req.params;
-  
-      const upcomingAppointments = await appointmentModel.find({
-        DoctorID,
-        appointmentdate: { $gte: new Date() }, // Find appointments from today onwards
-        status: 'scheduled'
-      }).populate('PatientID','firstname lastname ');
-  
-      res.status(200).json({ message: 'Upcoming appointments', data: upcomingAppointments });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
 
 module.exports = {
   createAppointment,
@@ -147,6 +129,6 @@ module.exports = {
   DeleteAppointment,
   getPatientAppointmentHistory,
   getDoctorAppointmentHistory,
-  cancelAppointment,
-  getDoctorUpcomingAppointments
 };
+
+

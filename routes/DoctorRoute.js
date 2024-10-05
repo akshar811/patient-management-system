@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { doctorLogin, resetpassword, DoctorProfile, EditProfile, PatientRecord, SinglePatient } = require("../controllers/DoctorController");
+const { doctorLogin, resetpassword, DoctorProfile, EditProfile, SinglePatient, AppoinmentRecord, allPatients } = require("../controllers/DoctorController");
 const { DoctorAuth } = require("../middlewares/auth");
 
 
@@ -18,13 +18,13 @@ DoctorRoute.patch("/Doctor-Edit/:id",DoctorAuth,EditProfile);
 // change password
 DoctorRoute.patch("/resetpassword",DoctorAuth,resetpassword);
 
-//  patiend Record
-DoctorRoute.get("/PatientRecord",DoctorAuth,PatientRecord);
+//  Appoinment Record
+DoctorRoute.get("/AppoinmentRecord",DoctorAuth,AppoinmentRecord);
 
 // single patient details
-DoctorRoute.get("/SinglePatient/:PatientID",DoctorAuth,SinglePatient);
+DoctorRoute.get("/SinglePatient/:id",DoctorAuth,SinglePatient);
 
-
-
+// all patient
+DoctorRoute.get("/AllPatients",DoctorAuth,allPatients);
 
 module.exports = DoctorRoute;

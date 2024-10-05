@@ -22,6 +22,12 @@ const patientSchema = new mongoose.Schema(
     address: { type: String, required: true },
     password: { type: String, require: true },
     confirmpassword: { type: String, require: true },
+
+    AppointmentID: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Appointment",
+    }],
+
   },
   { timestamps: true }
 );

@@ -10,7 +10,6 @@ const appointmentSchema = new mongoose.Schema({
   country : {type : String, required : true},
   appointmentdate: { type: Date, required: true },
   appointmentTime : {type : String , required : true},
-  status: { type: String, enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled' },
   type: { type: String, enum: ['online', 'teleconsultation'], required: true },
   patientIssue: {type : String , required : true},
   diease: String,
@@ -20,3 +19,4 @@ const appointmentSchema = new mongoose.Schema({
 const appointmentModel = mongoose.model('Appointment', appointmentSchema);
 
 module.exports = appointmentModel;
+

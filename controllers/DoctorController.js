@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Doctor = require("../models/DcoterSchema");
 const appointmentModel = require("../models/AppointmentModel");
+const Patient = require("../models/PatientModel");
 
 // doctor log in
 const doctorLogin = async (req, res) => {
@@ -88,7 +89,7 @@ const EditProfile = async (req, res) => {
 };
 
 // patient record
-const PatientRecord = async (req, res) => {
+const AppoinmentRecord = async (req, res) => {
   try {
     const appointmentHistory = await appointmentModel
       .find({ DoctorID: req.body.DoctorID })
@@ -108,11 +109,10 @@ const PatientRecord = async (req, res) => {
 // single page patient details
 const SinglePatient = async (req, res) => {
   try {
-    let { PatientID } = req.params;
-    const singlepatient = await appointmentModel
-      .findOne({ PatientID })
-      .populate({ path: "PatientID" })
-      .populate({ path: "DoctorID", select: "DoctorName" });
+    let { id } = req.params;
+    const singlepatient = await Patient
+      .findById(id)
+      .populate({ path: "AppointmentID" });
     res.json(singlepatient);
   } catch (error) {
     console.log(error);
@@ -121,11 +121,22 @@ const SinglePatient = async (req, res) => {
   }
 };
 
+// all patient
+const allPatients = async (req, res) => {
+   try {
+      let data = await Patient.find();
+      res.status(200).json({ data: data });
+   } catch (error) {
+     res.status(500).json({ message: error.message });
+   }
+}
+
 module.exports = {
   doctorLogin,
   resetpassword,
   DoctorProfile,
   EditProfile,
-  PatientRecord,
+  AppoinmentRecord,
   SinglePatient,
+  allPatients
 };

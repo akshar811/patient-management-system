@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Hospital = require("../models/HospitalModel");
 const Doctor = require("../models/DcoterSchema");
+const Patient = require("../models/PatientModel");
 
 const signup = async (req, res) => {
   try {
@@ -187,4 +188,46 @@ const AdminUpdate = async (req, res) => {
 
 };
 
-module.exports = { signup, login, resetpassword, createHospital, AddDoctor  , AdminUpdate , AdminProfile};
+// admin pannel - doctor management / all doctor
+const AllDoctorFind = async (req, res) => {
+  try {
+      let doctors=await Doctor.find()
+      res.json(doctors)
+  } catch (error) {
+      res.status(500).json({ msg: error.message });
+  }
+};
+
+// admin pannel - doctor management / update doctor data
+const UpdateDoctor = async (req, res) => {
+  try {
+      let{id}=req.params
+      let doctors=await Doctor.findByIdAndUpdate(id,req.body,{new:true})
+      res.json(doctors)
+  } catch (error) {
+      res.status(500).json({ msg: error.message });
+  }
+};
+
+ // admin pannel - doctor management / delete doctor data
+const DeleteDoctor = async (req, res) => {
+  try {
+      let{id}=req.params
+      let doctors=await Doctor.findByIdAndDelete(id)
+      res.json({msg:"Doctor delete sucessfully"})
+  } catch (error) {
+      res.status(500).json({ msg: error.message });
+  }
+};
+
+ // admin pannel - aptient management / All Patient
+const AllPatient = async (req, res) => {
+  try {
+      let patients=await Patient.find()
+      res.json(patients)
+  } catch (error) {
+      res.status(500).json({ msg: error.message });
+  }
+};
+
+module.exports = { signup, login, resetpassword, createHospital, AddDoctor  , AdminUpdate , AdminProfile , AllDoctorFind , UpdateDoctor , DeleteDoctor , AllPatient};

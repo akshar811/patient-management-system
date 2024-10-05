@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { createAppointment, AllAppointment, UpdateAppointment, DeleteAppointment, getPatientAppointmentHistory, getDoctorAppointmentHistory, cancelAppointment, getDoctorUpcomingAppointments } = require("../controllers/AppointmentController");
+const { createAppointment, AllAppointment, UpdateAppointment, DeleteAppointment, getPatientAppointmentHistory, getDoctorAppointmentHistory } = require("../controllers/AppointmentController");
 const { Auth, DoctorAuth } = require("../middlewares/auth");
 
 const AppointmentRoute = Router();
@@ -20,11 +20,6 @@ AppointmentRoute.delete("/Delete-Appointments/:id",Auth,DeleteAppointment);
 AppointmentRoute.get("/Doctor-Appointment-History/:DoctorID",DoctorAuth,getDoctorAppointmentHistory);
 
 
-// cancelcAppointment
-AppointmentRoute.patch("/cancelAppointment/:id",Auth,cancelAppointment);
-
-// Fetch all upcoming appointments for a doctor
-AppointmentRoute.get("/UpcomingAppointment/:DoctorID",DoctorAuth,getDoctorUpcomingAppointments);
 
 module.exports = AppointmentRoute;
 
